@@ -5,10 +5,7 @@
 
 static int isRed(Elm *p)
 {
-    if (p == NULL)
-        return 0;
-
-    return p->color == RED;
+    return p != NULL && p->color == RED;
 }
 
 static Elm *rotateLeft(Elm *h)
@@ -53,30 +50,37 @@ int less(const Student *a, const Student *b)
     return strcmp(a->id, b->id) < 0;
 }
 
-static Elm *put(Elm *h, const Student *x)
+static Elm *insertNode(Elm *h, const Student *px)
 {
     if (h == NULL) {
-        Elm *p = malloc(sizeof(Elm));
+        Elm *q = malloc(sizeof(Elm));
 
-        if (p == NULL)
+        if (q == NULL)
             return NULL;
 
-        p->x = *x;
-        p->color = RED;
-        p->L = NULL;
-        p->R = NULL;
+        q->x = *px;
+        q->color = RED;
+        q->L = NULL;
+        q->R = NULL;
 
-        return p;
+        return q;
     }
 
-    int cmp = strcmp(x->id, h->x.id);
+    if (less(px, &h->x)) {
+        Elm *q = insertNode(h->L, px);
 
-    if (cmp < 0)
-        h->L = put(h->L, x);
-    else if (cmp > 0)
-        h->R = put(h->R, x);
-    else
-        return h;
+        if (q != NULL)
+            h->L = q;
+    }
+    else if (less(&h->x, px)) {
+        Elm *q = insertNode(h->R, px);
+
+        if (q != NULL)
+            h->R = q;
+    }
+    else {
+        h->x = *px;
+    }
 
     if (isRed(h->R) && !isRed(h->L))
         h = rotateLeft(h);
@@ -92,7 +96,10 @@ static Elm *put(Elm *h, const Student *x)
 
 void rb_put(RBT *ptree, const Student *px)
 {
-    ptree->root = put(ptree->root, px);
+    if (ptree == NULL || px == NULL)
+        return;
+
+    ptree->root = insertNode(ptree->root, px);
 
     if (ptree->root != NULL)
         ptree->root->color = BLACK;
@@ -100,7 +107,12 @@ void rb_put(RBT *ptree, const Student *px)
 
 Elm *rb_get(const RBT *ptree, const char id[])
 {
-    Elm *p = ptree->root;
+    Elm *p;
+
+    if (ptree == NULL || id == NULL)
+        return NULL;
+
+    p = ptree->root;
 
     while (p != NULL) {
         int cmp = strcmp(id, p->x.id);
@@ -218,13 +230,14 @@ static Elm *deleteNode(Elm *h, const char id[])
 
 void rb_del(RBT *ptree, const char id[])
 {
-    if (ptree->root == NULL)
+    if (ptree == NULL || ptree->root == NULL || id == NULL)
         return;
 
     if (rb_get(ptree, id) == NULL)
         return;
 
-    if (!isRed(ptree->root->L) && !isRed(ptree->root->R))
+    if (!isRed(ptree->root->L) &&
+        !isRed(ptree->root->R))
         ptree->root->color = RED;
 
     ptree->root = deleteNode(ptree->root, id);
@@ -237,7 +250,10 @@ void print(Elm *p)
 {
     if (p)
         printf("%s %s %d %.1f\n",
-               p->x.name, p->x.id, p->x.age, p->x.gpa);
+               p->x.name,
+               p->x.id,
+               p->x.age,
+               p->x.gpa);
     else
         printf("None\n");
 }
