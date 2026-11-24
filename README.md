@@ -1,259 +1,147 @@
-#include "DS.h"
+**# Red-Black Tree Assignment**
 
-#define RED 1
-#define BLACK 0
+![Points]\(.github/badges/points.svg)
 
-static int isRed(Elm *p)
+**## Үнэлгээ**
+
+Даалгаврыг GitHub Actions ашиглан автоматаар шалгаж, 10 оноогоор үнэлнэ.
+
+**\*\*Нийт оноо: 10\*\***
+
+\| Тест | Оноо |
+\|---|---:|
+\| sample | 1 |
+\| small | 2 |
+\| big | 3 |
+\| put | 4 |
+\| **\*\*Нийт\*\*** | **\*\*10\*\*** |
+
+**## Бодлогын тодорхойлолт**
+
+
+Хаяган хувьсагч ашиглан Улаан хар тэнцвэрт модыг (ТМ) хэрэгжүүлнэ. ТМ-д оюутны мэдээлэл хадгалах бөгөөд оюутны ID-аар түлхүүр хийж хадгална.
+
+Таны хэрэгжүүлэлт n = 100,000 буюу 100,000 ширхэг оюутны мэдээлэл оруулж, устгахад **\*\*2 секундад\*\*** амжих хийх ёстой.
+
+**\*\*Даалгаврын хийхэд \`NULL\` хаягт хандвал үргэлж \`segmentation fault\` авахыг анхаарна уу!\*\***
+
+**## Даалгаврыг хийх заавар**
+
+\`n\` ширхэг команд орж ирнэ. Команд нь дараах гурвын аль нэг байна.
+  \* \`PUT нэр id нас дүн\`: УХТМ-д уг оюутны мэдээллийг оруулна. **\*\*Адилхан \`id\`-тай оюутан олдвол тэр оюутны мэдээллийг шинэчлэн өөрчилнө.\*\***
+  \* \`GET id\`: УХТМ-оос оюутны \`id\`-аар хайж оюутны мэдээллийг хэвлэнэ. Оюутны мэдээллийг хэвлэхдээ нэг шинэ мөрөнд нэр, id, нас, голч гэсэн дарааллаар нэг хоосон зайгаар тусгаарлан хэвлэнэ. Голчыг даслалаас хойш 1 оронгийн нарийвчлалтайгаар хэвлэнэ. Олдохгүй бол \`None\` гэж хэвлэнэ. Хэвлэх үйлдлийг \`print\` функцийг дуудаж шийдэж болно.
+  \* \`DEL id\`: УХТМ-оос оюутны \`id\`-аар хайж оюутны мэдээллийг модноос гаргана.
+
+Жишээ нь \`n = 7\` дараах оролт орж ирсэн бол&#x20;
+\`\`\`
+7
+PUT Bat A001 15 90.5
+PUT Dorj A002 20 95.3
+PUT Bold A003 21 70.0
+GET A002
+PUT Dulam A002 18 98.0
+GET A001
+GET A002
+\`\`\`
+харгалзах гаралт нь
+\`\`\`
+Dorj A002 20 95.3
+Bat A001 15 90.5
+Dulam A002 18 98.0
+\`\`\`
+
+**## Ерөнхий файл**
+\`DS.h\` нь бүтцийн ерөнхий толгой файл. Уг файл дотор хэрэгжүүлэх функцүүд зарлагдсан байна.
+
+**## Даалгаврыг хийх заавар**
+
+Энэ даалгаврыг хийхэд шаардлагатай мэдлэг:
+  1. Си хэлний бүтэц (struct)
+  2. Си хэлний хаяган хувьсагч, дам хандалтын ойлголт (pointer, dereference)
+  3. Динамикаар санах ой хуваарилах \`malloc\` функц, чөлөөлөх \`free\` функц
+
+Модны орой бүр дараах мэдээллийг агуулна.
+
+\| Elm    |
+\|:------:|
+\| x      |
+\| color  |
+\| \*L     |
+\| \*R     |
+\|        |
+
+  \* \`x\`: Тухайн оройд хадгалагдах оюутны мэдээлэл.
+  \* \`color\`: Тухайн орой эцэгтэйгээ холбогдох хэлбэр буюу өнгийг хадгална.
+  \* \`\*L\`: Зүүн хүүхдийн хаягийг заах хаяган хувьсагч. Өөрөөр хэлбэл зүүн дэд модны хаяг гэж ойлгож бас болно.
+  \* \`\*R\`: Баруун хүүхдийн хаягийг заах хаяган хувьсагч. Өөрөөр хэлбэл баруун дэд модны хаяг гэж ойлгож бас болно.
+
+Модны орой бүрийн хадгалах, эдгээр мэдээллийг&#x20;
+\`\`\`C
+struct Elm {
+        Student x;
+        int color;
+        struct Elm \*L;
+        struct Elm \*R;
+};
+typedef struct Elm Elm;
+\`\`\`
+бүтцэд хадгална. Тухайн оройн зүүн баруун, хүүхэдгүй бол L, R хаяган хувьсагчууд нь \`NULL\` хаягийг хадгалах ёстой.&#x20;
+
+Тэнцвэрт Модыг хадгалахад модны үндэс оройг заах ганц хаяган хувьсагч хэрэгтэй. Үүнийг&#x20;
+\`\`\`C
+struct RBT {
+        Elm \*root;
+};
+\`\`\`
+бүтцэд хадгалах болно. Хэрэгжүүлэх функцүүд нь \`RBT\` бүтцийн хаягийг хүлээн авах ба дотор нь модны үндэс хадгалагдсан тул модны бүх элементийг үндсээс нь хөөн хандах боломжтой.
+
+**### Функцүүдийг хэрэгжүүлэх заавар**
+Функцүүдийг хэрэгжүүлэхдээ модны үндсийг хадгалах \`RBT\` бүтцэн хувьсагчийн хаягийг хүлээн авах ба түүний модны үндсийг хадгалах \`root\` хувьсагчаас хөөн бусад гишүүдэд хандана.
+
+Өөрийн хэрэглэх функцүүдийг хүссэнээрээ зарлан ашиглах боломжтой. Жишээ нь оруулах үйлдлийг лекц дээр үзсэнээр дараах байдлаар хэрэгжүүлэх боломжтой.
+\`\`\`C
+void rb_put(RBT \*ptree, const Student \*px)
 {
-    return p != NULL && p->color == RED;
+    ptree->root = insert1(ptree->root, px);
+    // эсвэл
+    insert2(ptree->root, x, NULL);
 }
+\`\`\`
 
-static Elm *rotateLeft(Elm *h)
+Оюутны мэдээлэл нь хэд хэдэн өгөгдөлтэй том бүтэц учраас утгаар дамжуулахаас зайлсхийж хаягаар өгөгдлийг дамжуулсан тул оруулах газарт утгыг дараах байдлаар оноож өгөх боломжтой.
+\`\`\`C
+void rb_put(RBT \*ptree, const Student \*px)&#x20;
 {
-    Elm *x = h->R;
-
-    h->R = x->L;
-    x->L = h;
-
-    x->color = h->color;
-    h->color = RED;
-
-    return x;
+ //...
+    Elm \*q = malloc(sizeof(Elm));
+    q->x = \*px;
+  // эсвэл
+  strcpy(q->x.name, px->name);
+  strcpy(q->x.id, px->id);
+  q->x.age = px->age;
+  q->x.gpa = px->gpa;
+ //...
 }
+\`\`\`
 
-static Elm *rotateRight(Elm *h)
-{
-    Elm *x = h->L;
+**### Хэрэгжүүлэх функцүүд**
 
-    h->L = x->R;
-    x->R = h;
+  \* Жиших функц: \`a\`, \`b\` оюутныг \`id\`-аар цагаан толгойн дарааллаар жишиж \`a\` нь бага бол 1, үгүй бол 0-ийг буцаах функц.
+    \`\`\`C
+    int less(const Student \*a, const Student \*b);
+    \`\`\`
 
-    x->color = h->color;
-    h->color = RED;
+  \* Оруулах функц: ТМнд \`px\` хаягт хадгалагдсан оюутны мэдээллийг оруулна. Оруулахдаа УХТМны зарчмаар оруулна. Жишилтийг \`less\` функцийг ашиглан оюутны \`id\`-аар жишиж оруулна.
+    \`\`\`C
+    void rb_put(RBT \*ptree, const Student \*px);
+    \`\`\`
 
-    return x;
-}
+  \* Хайх функц: УХТМноос \`id\`-аар хайн олдсон оройн \`Elm\*\` хаягийг буцаана. Олдохгүй бол \`NULL\` хаягийг буцаана.&#x20;
+    \`\`\`C
+    Elm \*rb_get(const RBT \*ptree, const char id[]);
+    \`\`\`
 
-static void flipColors(Elm *h)
-{
-    h->color = !h->color;
-
-    if (h->L != NULL)
-        h->L->color = !h->L->color;
-
-    if (h->R != NULL)
-        h->R->color = !h->R->color;
-}
-
-int less(const Student *a, const Student *b)
-{
-    return strcmp(a->id, b->id) < 0;
-}
-
-static Elm *insertNode(Elm *h, const Student *px)
-{
-    if (h == NULL) {
-        Elm *q = malloc(sizeof(Elm));
-
-        if (q == NULL)
-            return NULL;
-
-        q->x = *px;
-        q->color = RED;
-        q->L = NULL;
-        q->R = NULL;
-
-        return q;
-    }
-
-    if (less(px, &h->x)) {
-        Elm *q = insertNode(h->L, px);
-
-        if (q != NULL)
-            h->L = q;
-    }
-    else if (less(&h->x, px)) {
-        Elm *q = insertNode(h->R, px);
-
-        if (q != NULL)
-            h->R = q;
-    }
-    else {
-        h->x = *px;
-    }
-
-    if (isRed(h->R) && !isRed(h->L))
-        h = rotateLeft(h);
-
-    if (isRed(h->L) && isRed(h->L->L))
-        h = rotateRight(h);
-
-    if (isRed(h->L) && isRed(h->R))
-        flipColors(h);
-
-    return h;
-}
-
-void rb_put(RBT *ptree, const Student *px)
-{
-    if (ptree == NULL || px == NULL)
-        return;
-
-    ptree->root = insertNode(ptree->root, px);
-
-    if (ptree->root != NULL)
-        ptree->root->color = BLACK;
-}
-
-Elm *rb_get(const RBT *ptree, const char id[])
-{
-    Elm *p;
-
-    if (ptree == NULL || id == NULL)
-        return NULL;
-
-    p = ptree->root;
-
-    while (p != NULL) {
-        int cmp = strcmp(id, p->x.id);
-
-        if (cmp < 0)
-            p = p->L;
-        else if (cmp > 0)
-            p = p->R;
-        else
-            return p;
-    }
-
-    return NULL;
-}
-
-static Elm *moveRedLeft(Elm *h)
-{
-    flipColors(h);
-
-    if (h->R != NULL && isRed(h->R->L)) {
-        h->R = rotateRight(h->R);
-        h = rotateLeft(h);
-        flipColors(h);
-    }
-
-    return h;
-}
-
-static Elm *moveRedRight(Elm *h)
-{
-    flipColors(h);
-
-    if (h->L != NULL && isRed(h->L->L)) {
-        h = rotateRight(h);
-        flipColors(h);
-    }
-
-    return h;
-}
-
-static Elm *balance(Elm *h)
-{
-    if (isRed(h->R))
-        h = rotateLeft(h);
-
-    if (isRed(h->L) && isRed(h->L->L))
-        h = rotateRight(h);
-
-    if (isRed(h->L) && isRed(h->R))
-        flipColors(h);
-
-    return h;
-}
-
-static Elm *minNode(Elm *h)
-{
-    while (h->L != NULL)
-        h = h->L;
-
-    return h;
-}
-
-static Elm *deleteMin(Elm *h)
-{
-    if (h->L == NULL) {
-        free(h);
-        return NULL;
-    }
-
-    if (!isRed(h->L) && !isRed(h->L->L))
-        h = moveRedLeft(h);
-
-    h->L = deleteMin(h->L);
-
-    return balance(h);
-}
-
-static Elm *deleteNode(Elm *h, const char id[])
-{
-    if (strcmp(id, h->x.id) < 0) {
-        if (h->L != NULL) {
-            if (!isRed(h->L) && !isRed(h->L->L))
-                h = moveRedLeft(h);
-
-            h->L = deleteNode(h->L, id);
-        }
-    }
-    else {
-        if (isRed(h->L))
-            h = rotateRight(h);
-
-        if (strcmp(id, h->x.id) == 0 && h->R == NULL) {
-            free(h);
-            return NULL;
-        }
-
-        if (h->R != NULL) {
-            if (!isRed(h->R) && !isRed(h->R->L))
-                h = moveRedRight(h);
-
-            if (strcmp(id, h->x.id) == 0) {
-                Elm *m = minNode(h->R);
-
-                h->x = m->x;
-                h->R = deleteMin(h->R);
-            }
-            else {
-                h->R = deleteNode(h->R, id);
-            }
-        }
-    }
-
-    return balance(h);
-}
-
-void rb_del(RBT *ptree, const char id[])
-{
-    if (ptree == NULL || ptree->root == NULL || id == NULL)
-        return;
-
-    if (rb_get(ptree, id) == NULL)
-        return;
-
-    if (!isRed(ptree->root->L) &&
-        !isRed(ptree->root->R))
-        ptree->root->color = RED;
-
-    ptree->root = deleteNode(ptree->root, id);
-
-    if (ptree->root != NULL)
-        ptree->root->color = BLACK;
-}
-
-void print(Elm *p)
-{
-    if (p)
-        printf("%s %s %d %.1f\n",
-               p->x.name,
-               p->x.id,
-               p->x.age,
-               p->x.gpa);
-    else
-        printf("None\n");
-}
+  \* Устгах функц: ТМноос \`id\`-аар хайж олоод устгана. Олдохгүй бол юу ч хийхгүй.&#x20;
+    \`\`\`C
+    void rb_del(RBT \*ptree, const char id[]);
+    \`\`\`
